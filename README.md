@@ -2,7 +2,7 @@
 ## What is Console Commands?
 Console Commands is a plugin that allows you to use simple commands in the Broke Protocol Console.
 ## How to use?
-Just install Console Commands from the steam workshop or from the latest [release](https://github.com/xiluisx/ConsoleCommandsBp/releases/, move the .dll if necessary and start your server. Then you'll have access to the commands from the console.
+Just install Console Commands from the steam workshop or from the latest [release](https://github.com/xiluisx/ConsoleCommandsBp/releases/) , move the .dll if necessary and start your server. Then you'll have access to the commands from the console.
 ## What commands can i use?
 The current commands are:
 - Help: Shows the help menu
