@@ -37,6 +37,7 @@ namespace ConsoleCommands
             {
                 if (args.Length >= 2)
                 {
+                    //test
                     if (Core.Instance.SvManager.connectedPlayers.Values.Any(x => x.username == args[1]))
                     {
                         if (args.Length == 4)
