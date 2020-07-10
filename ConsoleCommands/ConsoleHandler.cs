@@ -1,21 +1,29 @@
 ﻿using BrokeProtocol.API;
 using BrokeProtocol.Entities;
+using BrokeProtocol.Server.LiteDB.Models;
 using BrokeProtocol.Utility;
+using BrokeProtocol.Utility.Networking;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
-
 namespace ConsoleCommands
 {
     class ConsoleHandler : IScript
     {
 
         List<ShItem> items = new List<ShItem>();
+        
 
         public ConsoleHandler()
         {
+            BrokeProtocol.Managers.SceneManager.Instance.entityCollection.ToList().ForEach(x => Debug.LogWarning(x.Value + "-" + x.Value.GetType().Name));
+
             foreach (var obj in BrokeProtocol.Managers.SceneManager.Instance.entityCollection)
             {
                 if (obj.Value is ShItem)
@@ -25,11 +33,15 @@ namespace ConsoleCommands
             }
         }
 
-
         [Target(GameSourceEvent.ManagerConsoleInput, ExecutionMode.Event)]
         public void OnConsoleMessage(string command)
         {
-            string[] args = command.Split(' ');
+            string[] args = command.Split('"')
+                     .Select((element, index) => index % 2 == 0  // If even index
+                                           ? element.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)  // Split the item
+                                           : new string[] { element })  // Keep the entire item
+                     .SelectMany(element => element).ToArray();
+
             string first = args[0].ToLower();
             if (first == "groups")
                 GroupManager.Groups.Values.ToList().ForEach(i => Debug.Log(i.Name));
@@ -133,13 +145,17 @@ namespace ConsoleCommands
                 {
                     if (Core.Instance.SvManager.connectedPlayers.Values.Any(i => i.username == args[1]))
                     {
+                        Debug.Log("Player is online");
                         string reason = null;
                         if (args.Length >= 3)
                         {
                             reason = StringBuilder.WithArray(args, args.Length, 2);
                         }
                         var player = Core.Instance.SvManager.connectedPlayers.Values.First(i => i.username == args[1]);
-                        player.svPlayer.SvBan(player, reason ?? "No reason.");
+                        Core.Instance.SvManager.Disconnect(player.svPlayer.connection, DisconnectTypes.Banned);
+                        var user = Core.Instance.SvManager.database.Users.FindById(args[1]);
+                        Core.Instance.SvManager.database.Bans.Insert(user.IP, new Ban { Reason = reason ?? "No reason.", Username = player.username });
+                        Core.Instance.SvManager.database.Users.Upsert(user);
                         Debug.Log($"{args[1]} has been banned.");
                     }
                     else
@@ -152,7 +168,7 @@ namespace ConsoleCommands
                             {
                                 reason = StringBuilder.WithArray(args, args.Length, 2);
                             }
-                            user.Ban(reason ?? "No reason.");
+                            Core.Instance.SvManager.database.Bans.Insert(user.IP, new Ban { Reason = reason ?? "No reason.", Username = user.ID });
                             Core.Instance.SvManager.database.Users.Upsert(user);
                             Debug.Log($"{args[1]} has been banned.");
                         }
@@ -177,16 +193,20 @@ namespace ConsoleCommands
                         Debug.Log("User not found");
                         return;
                     }
-                    if (!user.BanInfo.IsBanned)
-                    {
-                        Debug.Log("User is not banned");
-                        return;
-                    }
-                    user.Unban();
-                    user.BanInfo.Reason = "User was unbanned.";
 
-                    Core.Instance.SvManager.database.Users.Upsert(user);
-                    Debug.Log($"{args[1]} has been unbanned.");
+                    if (Core.Instance.SvManager.database.Bans.Delete(user.IP))
+                    {
+                        Core.Instance.SvManager.database.Users.Upsert(user);
+                        Debug.Log($"{args[1]} has been unbanned.");
+
+                    }
+                    else
+                    {
+                        Debug.Log($"{args[1]} was not banned");
+                    }
+
+
+
                 }
                 else
                 {
@@ -195,15 +215,17 @@ namespace ConsoleCommands
             }
             else if (first == "baninfo")
             {
+
                 if (args.Length >= 2)
                 {
                     if (Core.Instance.SvManager.TryGetUserData(args[1], out var user))
                     {
-                        Debug.Log("-User: " + user.ID + "\n" + "-isBanned: " + user.BanInfo.IsBanned + "\n" + "-Date :" + user.BanInfo.Date + "\n" + "-Reason: " + user.BanInfo.Reason);
+                        var userInfo = Core.Instance.SvManager.database.Bans.FindById(user.IP);
+                        Debug.Log("-User: " + userInfo.Username + "\n-Reason: " + userInfo.Reason);
                     }
                     else
                     {
-                        Debug.Log("User not found");
+                        Debug.Log("User was not found");
                     }
                 }
                 else
@@ -221,10 +243,52 @@ namespace ConsoleCommands
                     "\n" + "-Say: Sends a message to all users on the server.\n\tSay {message}" +
                     "\n" + "-Online: Shows all players that are online.\n\tOnline" +
                     "\n" + "-Ban: Bans a player with a reason.\n\tBan {user} {reason-optional}" +
-                    "\n" + "-Unban:Unbans a player.\n\tUnban {user}" +
+                    "\n" + "-Unban: Unbans a player.\n\tUnban {user}" +
                     "\n" + "-Baninfo: Shows the info of a player ban.\n\tBaninfo {user}" +
+                    "\n" + "-Tp/Teleport: Teleports a player to another player.\n\tTp {user} {target}" +
+                    "\n" + "-Banlist: Lists all players that are banned.\n\tBanlist" +
                     "\n" + "You can use uppercase or lowercase with the command you want to run"
                     );
+            }
+            else if (first == "quote")
+            {
+                foreach (var a in args)
+                {
+                    Debug.Log(a);
+                }
+            }
+            else if (first == "tp" || first == "teleport")
+            {
+                if (args.Length >= 2)
+                {
+                    if (Core.Instance.SvManager.connectedPlayers.Values.Any(i => i.username == args[1]))
+                    {
+                        var player = Core.Instance.SvManager.connectedPlayers.Values.First(i => i.username == args[1]);
+                        if (Core.Instance.SvManager.connectedPlayers.Values.Any(i => i.username == args[2]))
+                        {
+                            var target = Core.Instance.SvManager.connectedPlayers.Values.First(i => i.username == args[2]);
+                            player.SetPositionSafe(target.GetPosition);
+                        }
+                        else
+                        {
+                            Debug.Log("Target not found");
+                        }
+                    }
+                    else
+                    {
+                        Debug.Log("Player not found");
+                    }
+                }
+                else
+                {
+                    Debug.LogError("Use the format \"tp {user} {target}\".");
+                }
+            }else if(first == "banlist")
+            {
+                foreach(var banned in Core.Instance.SvManager.database.Bans.FindAll())
+                {
+                    Debug.Log("{\n" + "\t" + "Username: "+banned.Username + "\n" + "\t" +"Reason: "+ banned.Reason + "\n}");
+                }
             }
 
             void GiveItem(ShPlayer player, string itemName, int quantity = 1)
