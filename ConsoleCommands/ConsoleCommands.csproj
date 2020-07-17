@@ -101,8 +101,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AddGroup.cs" />
-    <Compile Include="Command.cs" />
+    <Compile Include="Commands\AddGroup.cs" />
+    <Compile Include="Commands\Clear.cs" />
+    <Compile Include="Commands\Command.cs" />
     <Compile Include="Commands\Give.cs" />
     <Compile Include="Commands\Groups.cs" />
     <Compile Include="Commands\Help.cs" />
@@ -110,6 +111,7 @@
     <Compile Include="Commands\Moderation\Ban.cs" />
     <Compile Include="Commands\Moderation\BanInfo.cs" />
     <Compile Include="Commands\Moderation\BanList.cs" />
+    <Compile Include="Commands\Moderation\GetUserInfo.cs" />
     <Compile Include="Commands\Moderation\Teleport.cs" />
     <Compile Include="Commands\Moderation\Unban.cs" />
     <Compile Include="Commands\Online.cs" />
