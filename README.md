@@ -19,26 +19,24 @@ Just install Console Commands from the steam workshop or from the latest [releas
 - Name: ItemList
   - Command: "itemlist"
   - Description: List all the items of type ShItem.
-        -Name: Online
-                -Command: "online"
-                -Description: Gives a list of all online players.
-        -Name: Say
-                -Command: "say"
-                -Description: Sends a message to the whole server.
-        -Name: Ban
-                -Command: "ban"
-                -Description: Bans a player ip from the server.
-        -Name: BanInfo
-                -Command: "baninfo"
-                -Description: Gets the info of a user ban.
-        -Name: BanList
-                -Command: "banlist"
-                -Description: Shows a list of all users that are banned.
-        -Name: Teleport
-                -Command: "teleport"
-                -Description: Teleports a player to another player(target).
-        -Name: UnBan
-                -Command: "unban"
-                -Description: Removes the ban from a player.
-
-You can use uppercase or lowercase with the command you want to run.
+- Name: Online
+  - Command: "online"
+  - Description: Gives a list of all online players.
+- Name: Say
+  - Command: "say"
+  - Description: Sends a message to the whole server.
+- Name: Ban
+  - Command: "ban"
+  - Description: Bans a player ip from the server.
+- Name: BanInfo
+  - Command: "baninfo"
+  - Description: Gets the info of a user ban.
+- Name: BanList
+  - Command: "banlist"
+  - Description: Shows a list of all users that are banned.
+- Name: Teleport
+  - Command: "teleport"
+  - Description: Teleports a player to another player(target).
+- Name: UnBan
+  - Command: "unban"
+  - Description: Removes the ban from a player.
