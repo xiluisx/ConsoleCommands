@@ -111,7 +111,6 @@
     <Compile Include="Commands\Moderation\Ban.cs" />
     <Compile Include="Commands\Moderation\BanInfo.cs" />
     <Compile Include="Commands\Moderation\BanList.cs" />
-    <Compile Include="Commands\Moderation\GetUserInfo.cs" />
     <Compile Include="Commands\Moderation\Teleport.cs" />
     <Compile Include="Commands\Moderation\Unban.cs" />
     <Compile Include="Commands\Online.cs" />
