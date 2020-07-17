@@ -1,5 +1,4 @@
-﻿using BrokeProtocol.API;
-using BrokeProtocol.Utility.Networking;
+﻿using BrokeProtocol.Utility.Networking;
 using System.Linq;
 using UnityEngine;
 
@@ -15,12 +14,7 @@ namespace ConsoleCommands.Commands.Moderation
 
         public override void Run(string[] args)
         {
-            /*
-             * args[1] = username
-             * args[2-lenght] = reason 
-             */
-
-            if (args.Length >0)
+            if (args.Length > 0)
             {
                 if (Core.Instance.SvManager.connectedPlayers.Values.Any(i => i.username == args[0]))
                 {
@@ -35,7 +29,7 @@ namespace ConsoleCommands.Commands.Moderation
                     var user = Core.Instance.SvManager.database.Users.FindById(args[0]);
                     Core.Instance.SvManager.database.Bans.Insert(user.IP, new BrokeProtocol.Server.LiteDB.Models.Ban { Reason = reason ?? "No reason.", Username = player.username });
                     Core.Instance.SvManager.database.Users.Upsert(user);
-                    Debug.Log($"{args[0]} has been banned for {reason??"No reason"}.");
+                    Debug.Log($"{args[0]} has been banned for {reason ?? "No reason"}.");
                 }
                 else
                 {
