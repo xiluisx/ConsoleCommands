@@ -27,7 +27,7 @@ namespace ConsoleCommands.Commands.Moderation
                     var player = Core.Instance.SvManager.connectedPlayers.Values.First(i => i.username == args[0]);
                     Core.Instance.SvManager.Disconnect(player.svPlayer.connection, DisconnectTypes.Banned);
                     var user = Core.Instance.SvManager.database.Users.FindById(args[0]);
-                    Core.Instance.SvManager.database.Bans.Insert(user.IP, new BrokeProtocol.Server.LiteDB.Models.Ban { Reason = reason ?? "No reason.", Username = player.username });
+                    Core.Instance.SvManager.database.Bans.Insert(user.IP,new BrokeProtocol.LiteDB.Ban { Reason = reason ?? "No reason.", Username = player.username });
                     Core.Instance.SvManager.database.Users.Upsert(user);
                     Debug.Log($"{args[0]} has been banned for {reason ?? "No reason"}.");
                 }
@@ -41,7 +41,7 @@ namespace ConsoleCommands.Commands.Moderation
                         {
                             reason = StringBuilder.WithArray(args, args.Length, 1);
                         }
-                        Core.Instance.SvManager.database.Bans.Insert(user.IP, new BrokeProtocol.Server.LiteDB.Models.Ban { Reason = reason ?? "No reason.", Username = user.ID });
+                        Core.Instance.SvManager.database.Bans.Insert(user.IP, new BrokeProtocol.LiteDB.Ban { Reason = reason ?? "No reason.", Username = user.ID });
                         Core.Instance.SvManager.database.Users.Upsert(user);
                         Debug.Log($"{args[0]} has been banned for {reason ?? "No reason"}.");
                     }
